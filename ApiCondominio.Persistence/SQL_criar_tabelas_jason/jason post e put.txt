@@ -1,0 +1,62 @@
+Post Imóvel
+{
+    "bloco": "01",
+    "apartamento": "101",
+    "boxGaragem": "224"
+}
+
+Post Imóvel
+{
+    "bloco": "01",
+    "apartamento": "102",
+    "boxGaragem": "223"
+}
+
+Post Morador
+{
+	"nome": "Waine",
+	"celular": "62 99854-2002",
+	"email": "w@gmail.com",
+	"isProprietario": true,
+	"dataEntrada": "2025-08-05T12:48:00.737Z",
+	"dataInclusao": "2025-08-05T12:48:00.737Z",
+	"imovelId": 1
+}
+
+Post Morador
+{
+	"nome": "Joazinho",
+	"celular": "62 99999-9999",
+	"email": "joao@gmail.com",
+	"isProprietario": true,
+	"dataEntrada": "2025-08-05T12:48:00.737Z",
+	"dataInclusao": "2025-08-05T12:48:00.737Z",
+	"imovelId": 1
+}
+
+Put Morador
+{
+    "id": 1,
+    "nome": "Waine editado",
+    "celular": "62 99854-0000",
+    "email": "waine@gmail.com",
+    "isProprietario": true,
+    "dataEntrada": "2025-08-05T12:48:00.737Z",
+    "dataSaida": "2025-08-07T12:48:00.737Z",
+    "dataInclusao": "2025-08-05T12:48:00.737Z",
+    "dataAlteracao": "2025-08-07T12:48:00.737Z",
+    "imovelId": 1
+}
+
+{
+    "id": 2,
+    "nome": "Joaozinho Editado",
+    "celular": "62 99999-9999",
+    "email": "joaozinho@gmail.com",
+    "isProprietario": true,
+    "dataEntrada": "2025-08-05T09:48:00.737Z",
+    "dataSaida": "2025-08-07T09:48:00.737Z",
+    "dataInclusao": "2025-08-07T10:57:19.740646Z",
+    "dataAlteracao": "2025-08-07T09:48:00.737Z",
+    "imovelId": 2
+}
