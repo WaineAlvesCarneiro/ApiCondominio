@@ -30,18 +30,18 @@ public class ImovelController(IImovelService service) : ControllerBase
     /// Lista os imóveis com paginação.
     /// </summary>
     /// <param name="page">Página atual</param>
-    /// <param name="pageSize">Itens por página</param>
+    /// <param name="linesPerPage">Itens por página</param>
     /// <param name="orderBy">Campo de ordenação</param>
     /// <param name="direction">Direção ASC ou DESC</param>
     /// <response code="200">Lista paginada retornada com sucesso.</response>
     [HttpGet("paginado")]
     public async Task<IActionResult> GetAllPagedAsync(
         [FromQuery] int page = 0,
-        [FromQuery] int pageSize = 10,
+        [FromQuery] int linesPerPage = 10,
         [FromQuery] string orderBy = "bloco",
         [FromQuery] string direction = "ASC")
     {
-        Result<PagedResultDto<ImovelDto>> result = await _service.GetAllPagedAsync(page, pageSize, orderBy, direction);
+        Result<PagedResultDto<ImovelDto>> result = await _service.GetAllPagedAsync(page, linesPerPage, orderBy, direction);
 
         if (!result.Sucesso)
             return Conflict(new { sucesso = false, erro = result.Mensagem });

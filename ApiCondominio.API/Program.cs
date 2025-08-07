@@ -61,14 +61,13 @@ builder.Services.AddSwaggerGen(opt =>
     });
 
 builder.Services.AddCors(options =>
-    {
-        options.AddDefaultPolicy(policy =>
-        {
-            policy.WithOrigins("http://localhost:4200")
-                  .AllowAnyHeader()
-                  .AllowAnyMethod();
-        });
-    });
+{
+    options.AddPolicy("AllowLocalhost",
+        builder => builder
+            .AllowAnyOrigin()
+            .AllowAnyMethod()
+            .AllowAnyHeader());
+});
 
 builder.Services.AddScoped<IImovelRepository, ImovelRepository>();
 builder.Services.AddScoped<IImovelService, ImovelService>();
@@ -100,7 +99,7 @@ builder.Services.AddAutoMapper(typeof(Program));
 
 WebApplication app = builder.Build();
 
-app.UseCors();
+app.UseCors("AllowLocalhost");
 
 if (app.Environment.IsDevelopment())
 {

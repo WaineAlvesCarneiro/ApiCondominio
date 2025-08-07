@@ -6,7 +6,7 @@ namespace ApiCondominio.Application.Interfaces;
 public interface IMoradorService
 {
     Task<Result<IEnumerable<MoradorDto>>> GetAllAsync();
-    Task<Result<PagedResultDto<MoradorDto>>> GetAllPagedAsync(int page, int pageSize, string orderBy, string direction);
+    Task<Result<PagedResultDto<MoradorDto>>> GetAllPagedAsync(int page, int linesPerPage, string orderBy, string direction);
     Task<Result<MoradorDto>> GetByIdAsync(int id);
     Task<Result<MoradorDto>> AddAsync(MoradorDto moradorDto);
     Task<Result> UpdateAsync(int id, MoradorDto moradorDto);

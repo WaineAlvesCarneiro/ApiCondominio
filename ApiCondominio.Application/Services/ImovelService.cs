@@ -26,9 +26,9 @@ public class ImovelService(IImovelRepository repository, IMoradorRepository mora
         return Result<IEnumerable<ImovelDto>>.Success(dtos);
     }
 
-    public async Task<Result<PagedResultDto<ImovelDto>>> GetAllPagedAsync(int page, int pageSize, string orderBy, string direction)
+    public async Task<Result<PagedResultDto<ImovelDto>>> GetAllPagedAsync(int page, int linesPerPage, string orderBy, string direction)
     {
-        (IEnumerable<Imovel> items, int totalCount) = await _repository.GetAllPagedAsync(page, pageSize, orderBy, direction);
+        (IEnumerable<Imovel> items, int totalCount) = await _repository.GetAllPagedAsync(page, linesPerPage, orderBy, direction);
 
         IEnumerable<ImovelDto> dtos = items.Select(imovel => new ImovelDto
         {
@@ -43,7 +43,7 @@ public class ImovelService(IImovelRepository repository, IMoradorRepository mora
             Items = dtos,
             TotalCount = totalCount,
             PageIndex = page,
-            PageSize = pageSize
+            LinesPerPage = linesPerPage
         };
 
         return Result<PagedResultDto<ImovelDto>>.Success(paged);

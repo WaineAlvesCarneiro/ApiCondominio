@@ -11,7 +11,7 @@ public class ImovelRepository(ApplicationDbContext context) : IImovelRepository
 
     public async Task<IEnumerable<Imovel>> GetAllAsync() => await _context.Imovels.ToListAsync();
 
-    public async Task<(IEnumerable<Imovel> Items, int TotalCount)> GetAllPagedAsync(int page, int pageSize, string orderBy, string direction)
+    public async Task<(IEnumerable<Imovel> Items, int TotalCount)> GetAllPagedAsync(int page, int linesPerPage, string orderBy, string direction)
     {
         IQueryable<Imovel> query = _context.Imovels.AsQueryable();
 
@@ -27,8 +27,8 @@ public class ImovelRepository(ApplicationDbContext context) : IImovelRepository
         int totalCount = await query.CountAsync();
 
         List<Imovel> items = await query
-            .Skip(page * pageSize)
-            .Take(pageSize)
+            .Skip(page * linesPerPage)
+            .Take(linesPerPage)
             .ToListAsync();
 
         return (items, totalCount);

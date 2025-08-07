@@ -39,9 +39,9 @@ public class MoradorService(IMoradorRepository repository, IImovelRepository imo
         return Result<IEnumerable<MoradorDto>>.Success(dtos);
     }
 
-    public async Task<Result<PagedResultDto<MoradorDto>>> GetAllPagedAsync(int page, int pageSize, string orderBy, string direction)
+    public async Task<Result<PagedResultDto<MoradorDto>>> GetAllPagedAsync(int page, int linesPerPage, string orderBy, string direction)
     {
-        (IEnumerable<Morador> items, int totalCount) = await _repository.GetAllPagedAsync(page, pageSize, orderBy, direction);
+        (IEnumerable<Morador> items, int totalCount) = await _repository.GetAllPagedAsync(page, linesPerPage, orderBy, direction);
 
         IEnumerable<MoradorDto> dtos = items.Select(m => new MoradorDto
         {
@@ -69,7 +69,7 @@ public class MoradorService(IMoradorRepository repository, IImovelRepository imo
             Items = dtos,
             TotalCount = totalCount,
             PageIndex = page,
-            PageSize = pageSize
+            LinesPerPage = linesPerPage
         };
 
         return Result<PagedResultDto<MoradorDto>>.Success(paged);
@@ -119,7 +119,7 @@ public class MoradorService(IMoradorRepository repository, IImovelRepository imo
             isProprietario = dto.isProprietario,
             dataEntrada = dto.dataEntrada,
             dataSaida = null,
-            dataInclusao = DateTime.UtcNow,
+            dataInclusao = dto.dataInclusao,//DateTime.UtcNow,
             dataAlteracao = null,
             imovelId = dto.imovelId
         };
@@ -163,7 +163,7 @@ public class MoradorService(IMoradorRepository repository, IImovelRepository imo
             ? DateTime.SpecifyKind(dto.dataSaida.Value, DateTimeKind.Utc)
             : null;
 
-        morador.dataAlteracao = DateTime.UtcNow;
+        morador.dataAlteracao = dto.dataAlteracao;//DateTime.UtcNow;
 
         morador.imovelId = dto.imovelId;
 

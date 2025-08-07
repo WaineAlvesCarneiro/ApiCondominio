@@ -11,7 +11,7 @@ public class MoradorRepository(ApplicationDbContext context) : IMoradorRepositor
 
     public async Task<IEnumerable<Morador>> GetAllAsync() => await _context.Moradors.Include(m => m.Imovel).ToListAsync();
 
-    public async Task<(IEnumerable<Morador> Items, int TotalCount)> GetAllPagedAsync(int page, int pageSize, string orderBy, string direction)
+    public async Task<(IEnumerable<Morador> Items, int TotalCount)> GetAllPagedAsync(int page, int linesPerPage, string orderBy, string direction)
     {
         IQueryable<Morador> query = _context.Moradors.Include(m => m.Imovel).AsQueryable();
 
@@ -27,8 +27,8 @@ public class MoradorRepository(ApplicationDbContext context) : IMoradorRepositor
         int totalCount = await query.CountAsync();
 
         List<Morador> items = await query
-            .Skip(page * pageSize)
-            .Take(pageSize)
+            .Skip(page * linesPerPage)
+            .Take(linesPerPage)
             .ToListAsync();
 
         return (items, totalCount);
