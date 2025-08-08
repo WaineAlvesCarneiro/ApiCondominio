@@ -77,7 +77,7 @@ public class ImovelController(IImovelService service) : ControllerBase
         if (!result.Sucesso)
             return Conflict(new { sucesso = false, erro = result.Mensagem });
 
-        return CreatedAtAction(nameof(GetById), new { id = result.Dados!.id }, new
+        return CreatedAtAction(nameof(GetById), new { id = result.Dados!.Id }, new
         {
             sucesso = true,
             dados = result.Dados

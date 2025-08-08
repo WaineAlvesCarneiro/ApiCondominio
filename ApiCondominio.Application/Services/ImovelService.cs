@@ -17,10 +17,10 @@ public class ImovelService(IImovelRepository repository, IMoradorRepository mora
 
         IEnumerable<ImovelDto> dtos = imoveis.Select(imovel => new ImovelDto
         {
-            id = imovel.id,
-            bloco = imovel.bloco,
-            apartamento = imovel.apartamento,
-            boxGaragem = imovel.boxGaragem
+            Id = imovel.Id,
+            Bloco = imovel.Bloco,
+            Apartamento = imovel.Apartamento,
+            BoxGaragem = imovel.BoxGaragem
         });
 
         return Result<IEnumerable<ImovelDto>>.Success(dtos);
@@ -32,10 +32,10 @@ public class ImovelService(IImovelRepository repository, IMoradorRepository mora
 
         IEnumerable<ImovelDto> dtos = items.Select(imovel => new ImovelDto
         {
-            id = imovel.id,
-            bloco = imovel.bloco,
-            apartamento = imovel.apartamento,
-            boxGaragem = imovel.boxGaragem
+            Id = imovel.Id,
+            Bloco = imovel.Bloco,
+            Apartamento = imovel.Apartamento,
+            BoxGaragem = imovel.BoxGaragem
         });
 
         PagedResultDto<ImovelDto> paged = new PagedResultDto<ImovelDto>
@@ -57,10 +57,10 @@ public class ImovelService(IImovelRepository repository, IMoradorRepository mora
 
         ImovelDto dto = new ImovelDto
         {
-            id = imovel.id,
-            bloco = imovel.bloco,
-            apartamento = imovel.apartamento,
-            boxGaragem = imovel.boxGaragem
+            Id = imovel.Id,
+            Bloco = imovel.Bloco,
+            Apartamento = imovel.Apartamento,
+            BoxGaragem = imovel.BoxGaragem
         };
 
         return Result<ImovelDto>.Success(dto);
@@ -70,14 +70,14 @@ public class ImovelService(IImovelRepository repository, IMoradorRepository mora
     {
         Imovel imovel = new Imovel
         {
-            bloco = dto.bloco,
-            apartamento = dto.apartamento,
-            boxGaragem = dto.boxGaragem
+            Bloco = dto.Bloco,
+            Apartamento = dto.Apartamento,
+            BoxGaragem = dto.BoxGaragem
         };
 
         await _repository.AddAsync(imovel);
 
-        dto.id = imovel.id;
+        dto.Id = imovel.Id;
         return Result<ImovelDto>.Success(dto, "Imóvel criado com sucesso.");
     }
 
@@ -88,9 +88,9 @@ public class ImovelService(IImovelRepository repository, IMoradorRepository mora
         if (imovel is null)
             return Result.Failure("Imóvel não encontrado.");
 
-        imovel.bloco = dto.bloco;
-        imovel.apartamento = dto.apartamento;
-        imovel.boxGaragem = dto.boxGaragem;
+        imovel.Bloco = dto.Bloco;
+        imovel.Apartamento = dto.Apartamento;
+        imovel.BoxGaragem = dto.BoxGaragem;
 
         await _repository.UpdateAsync(imovel);
         return Result.Success("Imóvel atualizado com sucesso.");

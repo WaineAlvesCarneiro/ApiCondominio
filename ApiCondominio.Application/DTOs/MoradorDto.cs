@@ -1,34 +1,33 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ApiCondominio.Application.DTOs;
 
 public class MoradorDto
 {
-    public int id { get; set; }
+    public int Id { get; set; }
 
     [Display(Name = "Nome do Morador")]
     [Required(ErrorMessage = "{0} é obrigatório")]
     [StringLength(50, MinimumLength = 3, ErrorMessage = "O campo {0} precisa ter entre {2} e {1} caracteres")]
-    public string nome { get; set; }
+    public required string Nome { get; set; }
 
     [Required(ErrorMessage = "{0} é obrigatório")]
     [StringLength(16, MinimumLength = 11, ErrorMessage = "O campo {0} precisa ter entre {2} e {1} caracteres")]
-    public string celular { get; set; }
+    public required string Celular { get; set; }
 
     [EmailAddress(ErrorMessage = "Formato de e-mail inválido")]
     [Required(ErrorMessage = "{0} é obrigatório")]
     [MaxLength(50, ErrorMessage = "O campo {0} pode ter no máximo {1} caracteres")]
-    public string email { get; set; }
+    public required string Email { get; set; }
 
     [Display(Name = "É proprietário?")]
-    public bool isProprietario { get; set; }
+    public bool IsProprietario { get; set; }
 
     private DateTime _dataEntrada;
     [Display(Name = "Data de entrada")]
     [DataType(DataType.Date)]
     [Required(ErrorMessage = "{0} é obrigatória")]
-    public DateTime dataEntrada
+    public DateTime DataEntrada
     {
         get => _dataEntrada;
         set => _dataEntrada = DateTime.SpecifyKind(value, DateTimeKind.Utc);
@@ -37,21 +36,21 @@ public class MoradorDto
     private DateTime? _dataSaida;
     [Display(Name = "Data de saída")]
     [DataType(DataType.Date)]
-    public DateTime? dataSaida
+    public DateTime? DataSaida
     {
         get => _dataSaida;
         set => _dataSaida = value.HasValue ? DateTime.SpecifyKind(value.Value, DateTimeKind.Utc) : null;
     }
 
     private DateTime _dataInclusao;
-    public DateTime dataInclusao
+    public DateTime DataInclusao
     {
         get => _dataInclusao;
         set => _dataInclusao = DateTime.SpecifyKind(value, DateTimeKind.Utc);
     }
 
     private DateTime? _dataAlteracao;
-    public DateTime? dataAlteracao
+    public DateTime? DataAlteracao
     {
         get => _dataAlteracao;
         set => _dataAlteracao = value.HasValue ? DateTime.SpecifyKind(value.Value, DateTimeKind.Utc) : null;
@@ -59,7 +58,7 @@ public class MoradorDto
 
     [Display(Name = "Imóvel")]
     [Required(ErrorMessage = "{0} é obrigatório")]
-    public int imovelId { get; set; }
+    public int ImovelId { get; set; }
 
-    public ImovelDto? imovelDto { get; set; }
+    public ImovelDto? ImovelDto { get; set; }
 }

@@ -17,22 +17,22 @@ public class MoradorService(IMoradorRepository repository, IImovelRepository imo
 
         IEnumerable<MoradorDto> dtos = moradores.Select(m => new MoradorDto
         {
-            id = m.id,
-            nome = m.nome,
-            celular = m.celular,
-            email = m.email,
-            isProprietario = m.isProprietario,
-            dataEntrada = m.dataEntrada,
-            dataSaida = m.dataSaida,
-            dataInclusao = m.dataInclusao,
-            dataAlteracao = m.dataAlteracao,
-            imovelId = m.imovelId,
-            imovelDto = new ImovelDto
+            Id = m.Id,
+            Nome = m.Nome,
+            Celular = m.Celular,
+            Email = m.Email,
+            IsProprietario = m.IsProprietario,
+            DataEntrada = m.DataEntrada,
+            DataSaida = m.DataSaida,
+            DataInclusao = m.DataInclusao,
+            DataAlteracao = m.DataAlteracao,
+            ImovelId = m.ImovelId,
+            ImovelDto = new ImovelDto
             {
-                id = m.Imovel.id,
-                bloco = m.Imovel.bloco,
-                apartamento = m.Imovel.apartamento,
-                boxGaragem = m.Imovel.boxGaragem
+                Id = m.Imovel.Id,
+                Bloco = m.Imovel.Bloco,
+                Apartamento = m.Imovel.Apartamento,
+                BoxGaragem = m.Imovel.BoxGaragem
             }
         });
 
@@ -45,22 +45,22 @@ public class MoradorService(IMoradorRepository repository, IImovelRepository imo
 
         IEnumerable<MoradorDto> dtos = items.Select(m => new MoradorDto
         {
-            id = m.id,
-            nome = m.nome,
-            celular = m.celular,
-            email = m.email,
-            isProprietario = m.isProprietario,
-            dataEntrada = m.dataEntrada,
-            dataSaida = m.dataSaida,
-            dataInclusao = m.dataInclusao,
-            dataAlteracao = m.dataAlteracao,
-            imovelId = m.imovelId,
-            imovelDto = new ImovelDto
+            Id = m.Id,
+            Nome = m.Nome,
+            Celular = m.Celular,
+            Email = m.Email,
+            IsProprietario = m.IsProprietario,
+            DataEntrada = m.DataEntrada,
+            DataSaida = m.DataSaida,
+            DataInclusao = m.DataInclusao,
+            DataAlteracao = m.DataAlteracao,
+            ImovelId = m.ImovelId,
+            ImovelDto = new ImovelDto
             {
-                id = m.Imovel.id,
-                bloco = m.Imovel.bloco,
-                apartamento = m.Imovel.apartamento,
-                boxGaragem = m.Imovel.boxGaragem
+                Id = m.Imovel.Id,
+                Bloco = m.Imovel.Bloco,
+                Apartamento = m.Imovel.Apartamento,
+                BoxGaragem = m.Imovel.BoxGaragem
             }
         });
 
@@ -83,22 +83,22 @@ public class MoradorService(IMoradorRepository repository, IImovelRepository imo
 
         MoradorDto dto = new MoradorDto
         {
-            id = m.id,
-            nome = m.nome,
-            celular = m.celular,
-            email = m.email,
-            isProprietario = m.isProprietario,
-            dataEntrada = m.dataEntrada,
-            dataSaida = m.dataSaida,
-            dataInclusao = m.dataInclusao,
-            dataAlteracao = m.dataAlteracao,
-            imovelId = m.imovelId,
-            imovelDto = new ImovelDto
+            Id = m.Id,
+            Nome = m.Nome,
+            Celular = m.Celular,
+            Email = m.Email,
+            IsProprietario = m.IsProprietario,
+            DataEntrada = m.DataEntrada,
+            DataSaida = m.DataSaida,
+            DataInclusao = m.DataInclusao,
+            DataAlteracao = m.DataAlteracao,
+            ImovelId = m.ImovelId,
+            ImovelDto = new ImovelDto
             {
-                id = m.Imovel.id,
-                bloco = m.Imovel.bloco,
-                apartamento = m.Imovel.apartamento,
-                boxGaragem = m.Imovel.boxGaragem
+                Id = m.Imovel.Id,
+                Bloco = m.Imovel.Bloco,
+                Apartamento = m.Imovel.Apartamento,
+                BoxGaragem = m.Imovel.BoxGaragem
             }
         };
 
@@ -107,33 +107,33 @@ public class MoradorService(IMoradorRepository repository, IImovelRepository imo
 
     public async Task<Result<MoradorDto>> AddAsync(MoradorDto dto)
     {
-        Imovel? imovel = await _imovelRepository.GetByIdAsync(dto.imovelId);
+        Imovel? imovel = await _imovelRepository.GetByIdAsync(dto.ImovelId);
         if (imovel is null)
             return Result<MoradorDto>.Failure("Imóvel informado não existe.");
 
         Morador morador = new Morador
         {
-            nome = dto.nome,
-            celular = dto.celular,
-            email = dto.email,
-            isProprietario = dto.isProprietario,
-            dataEntrada = dto.dataEntrada,
-            dataSaida = null,
-            dataInclusao = dto.dataInclusao,//DateTime.UtcNow,
-            dataAlteracao = null,
-            imovelId = dto.imovelId
+            Nome = dto.Nome,
+            Celular = dto.Celular,
+            Email = dto.Email,
+            IsProprietario = dto.IsProprietario,
+            DataEntrada = dto.DataEntrada,
+            DataSaida = null,
+            DataInclusao = dto.DataInclusao,//DateTime.UtcNow,
+            DataAlteracao = null,
+            ImovelId = dto.ImovelId
         };
 
         await _repository.AddAsync(morador);
 
-        dto.id = morador.id;
-        dto.dataInclusao = morador.dataInclusao;
-        dto.imovelDto = new ImovelDto
+        dto.Id = morador.Id;
+        dto.DataInclusao = morador.DataInclusao;
+        dto.ImovelDto = new ImovelDto
         {
-            id = imovel.id,
-            bloco = imovel.bloco,
-            apartamento = imovel.apartamento,
-            boxGaragem = imovel.boxGaragem
+            Id = imovel.Id,
+            Bloco = imovel.Bloco,
+            Apartamento = imovel.Apartamento,
+            BoxGaragem = imovel.BoxGaragem
         };
 
         return Result<MoradorDto>.Success(dto, "Morador criado com sucesso.");
@@ -145,27 +145,27 @@ public class MoradorService(IMoradorRepository repository, IImovelRepository imo
         if (morador is null)
             return Result.Failure("Morador não encontrado");
 
-        Imovel? imovel = await _imovelRepository.GetByIdAsync(dto.imovelId);
+        Imovel? imovel = await _imovelRepository.GetByIdAsync(dto.ImovelId);
         if (imovel is null)
             return Result.Failure("Imóvel não encontrado");
 
-        morador.nome = dto.nome;
-        morador.celular = dto.celular;
-        morador.email = dto.email;
-        morador.isProprietario = dto.isProprietario;
-        morador.dataEntrada = DateTime.SpecifyKind(dto.dataEntrada, DateTimeKind.Utc);
+        morador.Nome = dto.Nome;
+        morador.Celular = dto.Celular;
+        morador.Email = dto.Email;
+        morador.IsProprietario = dto.IsProprietario;
+        morador.DataEntrada = DateTime.SpecifyKind(dto.DataEntrada, DateTimeKind.Utc);
 
-        morador.dataInclusao = dto.dataInclusao != default
-            ? DateTime.SpecifyKind(dto.dataInclusao, DateTimeKind.Utc)
-            : morador.dataInclusao;
+        morador.DataInclusao = dto.DataInclusao != default
+            ? DateTime.SpecifyKind(dto.DataInclusao, DateTimeKind.Utc)
+            : morador.DataInclusao;
 
-        morador.dataSaida = dto.dataSaida.HasValue
-            ? DateTime.SpecifyKind(dto.dataSaida.Value, DateTimeKind.Utc)
+        morador.DataSaida = dto.DataSaida.HasValue
+            ? DateTime.SpecifyKind(dto.DataSaida.Value, DateTimeKind.Utc)
             : null;
 
-        morador.dataAlteracao = dto.dataAlteracao;//DateTime.UtcNow;
+        morador.DataAlteracao = dto.DataAlteracao;//DateTime.UtcNow;
 
-        morador.imovelId = dto.imovelId;
+        morador.ImovelId = dto.ImovelId;
 
 
         await _repository.UpdateAsync(morador);

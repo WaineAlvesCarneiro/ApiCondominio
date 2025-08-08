@@ -70,10 +70,11 @@ public class MoradorController(IMoradorService service) : ControllerBase
     public async Task<IActionResult> Post([FromBody] MoradorDto dto)
     {
         Result<MoradorDto> result = await _service.AddAsync(dto);
+
         if (!result.Sucesso)
             return Conflict(new { sucesso = false, erro = result.Mensagem });
 
-        return CreatedAtAction(nameof(GetById), new { id = result.Dados!.id }, new 
+        return CreatedAtAction(nameof(GetById), new { id = result.Dados!.Id }, new 
         {
             sucesso = true,
             dados = result.Dados 
@@ -89,6 +90,7 @@ public class MoradorController(IMoradorService service) : ControllerBase
     public async Task<IActionResult> Put(int id, [FromBody] MoradorDto dto)
     {
         Result result = await _service.UpdateAsync(id, dto);
+
         if (!result.Sucesso)
             return NotFound(new { sucesso = false, erro = result.Mensagem });
 

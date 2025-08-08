@@ -1,32 +1,41 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ApiCondominio.Domain.Entities;
 
-[Table("morador")]
+[Table("morador", Schema = "public")]
 public class Morador
 {
-    public int id { get; set; }
-    public required string nome { get; set; }
-    public required string celular { get; set; }
-    public required string email { get; set; }
+    [Key]
+    [Column("id")]
+    public int Id { get; set; }
+
+    [Column("nome")]
+    public required string Nome { get; set; }
+
+    [Column("celular")]
+    public required string Celular { get; set; }
+
+    [Column("email")]
+    public required string Email { get; set; }
 
     [Column("is_proprietario")]
-    public bool isProprietario { get; set; }
+    public bool IsProprietario { get; set; }
 
     [Column("data_entrada")]
-    public DateTime dataEntrada { get; set; }
+    public DateTime DataEntrada { get; set; }
 
     [Column("data_saida")]
-    public DateTime? dataSaida { get; set; }
+    public DateTime? DataSaida { get; set; }
 
     [Column("data_inclusao")]
-    public DateTime dataInclusao { get; set; }
+    public DateTime DataInclusao { get; set; }
 
     [Column("data_alteracao")]
-    public DateTime? dataAlteracao { get; set; }
+    public DateTime? DataAlteracao { get; set; }
 
     [Column("imovel_id")]
-    public required int imovelId { get; set; }
+    public required int ImovelId { get; set; }
 
     public Imovel? Imovel { get; set; } = null!;
 }
