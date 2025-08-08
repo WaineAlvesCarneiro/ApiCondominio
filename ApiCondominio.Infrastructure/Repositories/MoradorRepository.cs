@@ -3,6 +3,7 @@ using ApiCondominio.Domain.Interfaces;
 using ApiCondominio.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace ApiCondominio.Infrastructure.Repositories;
 
@@ -56,8 +57,7 @@ public class MoradorRepository(ApplicationDbContext context) : IMoradorRepositor
         return moradores;
     }
 
-    public async Task<(IEnumerable<Morador> Items, int TotalCount)> GetAllPagedAsync(
-    int page, int linesPerPage, string orderBy, string direction)
+    public async Task<(IEnumerable<Morador> Items, int TotalCount)> GetAllPagedAsync(int page, int linesPerPage, string orderBy, string direction)
     {
         string order = string.IsNullOrEmpty(orderBy) ? "m.id" : orderBy;
         string dir = direction?.ToUpper() == "DESC" ? "DESC" : "ASC";
@@ -128,6 +128,7 @@ public class MoradorRepository(ApplicationDbContext context) : IMoradorRepositor
 
         return (items, totalCount);
     }
+
     public async Task<Morador?> GetByIdAsync(int id)
     {
         string sql = @"SELECT m.id, m.nome, m.celular, m.email, m.is_proprietario,
@@ -241,9 +242,24 @@ public class MoradorRepository(ApplicationDbContext context) : IMoradorRepositor
 
     public async Task<bool> ExistsByMoradorIdAsync(int id)
     {
-        string sql = "SELECT COUNT(*) FROM public.morador WHERE imovel_id = {0}";
-        int count = await _context.Database.ExecuteSqlRawAsync(sql, id);
+        string sql = "SELECT COUNT(*) FROM public.morador WHERE imovel_id = @id";
 
-        return count > 0;
+        using var connection = _context.Database.GetDbConnection();
+        await connection.OpenAsync();
+
+        int totalCount;
+        using (var command = connection.CreateCommand())
+        {
+            var parameter = command.CreateParameter();
+
+            parameter.ParameterName = "@id";
+            parameter.Value = id;
+            command.Parameters.Add(parameter);
+
+            command.CommandText = sql;
+            totalCount = Convert.ToInt32(await command.ExecuteScalarAsync());
+        }
+
+        return totalCount > 0;
     }
 }
