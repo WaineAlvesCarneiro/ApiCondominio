@@ -2,7 +2,7 @@
 using ApiCondominio.Domain.Interfaces;
 using ApiCondominio.Persistence;
 using Microsoft.EntityFrameworkCore;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using Npgsql;
 
 namespace ApiCondominio.Infrastructure.Repositories;
 
@@ -12,128 +12,225 @@ public class MoradorRepository(ApplicationDbContext context) : IMoradorRepositor
 
     public async Task<IEnumerable<Morador>> GetAllAsync()
     {
-        string sql = @"
-            SELECT m.id, m.nome, m.celular, m.email, m.is_proprietario,
-                   m.data_entrada, m.data_saida, m.data_inclusao, m.data_alteracao,
-                   m.imovel_id
+        string sql = @"SELECT m.id, m.nome, m.celular, m.email, m.is_proprietario, m.data_entrada, m.data_saida, m.data_inclusao, m.data_alteracao, m.imovel_id,
+               i.id AS Imovel_Id, i.bloco, i.apartamento, i.box_garagem
             FROM public.morador m
             INNER JOIN public.imovel i ON i.id = m.imovel_id
-            ORDER BY m.id;";
+            ORDER BY m.id";
 
-        return await _context.Moradors
-            .FromSqlRaw(sql)
-            .ToListAsync();
+        using var connection = _context.Database.GetDbConnection();
+        await connection.OpenAsync();
+
+        using var command = connection.CreateCommand();
+        command.CommandText = sql;
+
+        List<Morador> moradores = new List<Morador>();
+
+        using System.Data.Common.DbDataReader reader = await command.ExecuteReaderAsync();
+        while (await reader.ReadAsync())
+        {
+            Morador morador = new Morador
+            {
+                Id = reader.GetInt32(reader.GetOrdinal("id")),
+                Nome = reader.GetString(reader.GetOrdinal("nome")),
+                Celular = reader.GetString(reader.GetOrdinal("celular")),
+                Email = reader.GetString(reader.GetOrdinal("email")),
+                IsProprietario = reader.GetBoolean(reader.GetOrdinal("is_proprietario")),
+                DataEntrada = reader.GetDateTime(reader.GetOrdinal("data_entrada")),
+                DataSaida = reader.IsDBNull(reader.GetOrdinal("data_saida")) ? null : reader.GetDateTime(reader.GetOrdinal("data_saida")),
+                DataInclusao = reader.GetDateTime(reader.GetOrdinal("data_inclusao")),
+                DataAlteracao = reader.IsDBNull(reader.GetOrdinal("data_alteracao")) ? null : reader.GetDateTime(reader.GetOrdinal("data_alteracao")),
+                ImovelId = reader.GetInt32(reader.GetOrdinal("imovel_id")),
+                Imovel = new Imovel
+                {
+                    Id = reader.GetInt32(reader.GetOrdinal("Imovel_Id")),
+                    Bloco = reader.GetString(reader.GetOrdinal("bloco")),
+                    Apartamento = reader.GetString(reader.GetOrdinal("apartamento")),
+                    BoxGaragem = reader.GetString(reader.GetOrdinal("box_garagem"))
+                }
+            };
+
+            moradores.Add(morador);
+        }
+
+        return moradores;
     }
 
-    public async Task<(IEnumerable<Morador> Items, int TotalCount)> GetAllPagedAsync(int page, int linesPerPage, string orderBy, string direction)
+    public async Task<(IEnumerable<Morador> Items, int TotalCount)> GetAllPagedAsync(
+    int page, int linesPerPage, string orderBy, string direction)
     {
-        // Normaliza ordenação
         string order = string.IsNullOrEmpty(orderBy) ? "m.id" : orderBy;
         string dir = direction?.ToUpper() == "DESC" ? "DESC" : "ASC";
 
-        // Evita SQL injection validando colunas
-        var allowedColumns = new[]
+        string[] allowedColumns =
         {
             "m.id", "m.nome", "m.celular", "m.email", "m.is_proprietario",
             "m.data_entrada", "m.data_saida", "m.data_inclusao", "m.data_alteracao",
-            "i.apartamento", "i.bloco", "i.box_garagem"
+            "i.bloco", "i.apartamento", "i.box_garagem"
         };
+
         if (!allowedColumns.Contains(order.ToLower()))
             order = "m.id";
 
         int offset = page * linesPerPage;
 
-        string sqlPaged = $@"
-            SELECT m.id, m.nome, m.celular, m.email, m.is_proprietario,
-                   m.data_entrada, m.data_saida, m.data_inclusao, m.data_alteracao,
-                   m.imovel_id
+        string sqlPaged = $@"SELECT m.id, m.nome, m.celular, m.email, m.is_proprietario,
+                   m.data_entrada, m.data_saida, m.data_inclusao, m.data_alteracao, m.imovel_id,
+                   i.id AS Imovel_Id, i.bloco, i.apartamento, i.box_garagem
             FROM public.morador m
             INNER JOIN public.imovel i ON i.id = m.imovel_id
             ORDER BY {order} {dir}
-            OFFSET @p0 LIMIT @p1;";
+            LIMIT {linesPerPage} OFFSET {offset}";
 
-        string sqlCount = @"
-            SELECT COUNT(*) 
-            FROM public.morador m
-            INNER JOIN public.imovel i ON i.id = m.imovel_id;";
+        string sqlCount = @" SELECT COUNT(*) FROM public.morador m INNER JOIN public.imovel i ON i.id = m.imovel_id";
 
-        var items = await _context.Moradors
-            .FromSqlRaw(sqlPaged, offset, linesPerPage)
-            .ToListAsync();
+        var items = new List<Morador>();
 
-        int totalCount = await _context.Database
-            .SqlQueryRaw<int>(sqlCount)
-            .SingleAsync();
+        using var connection = _context.Database.GetDbConnection();
+        await connection.OpenAsync();
+
+        using (var command = connection.CreateCommand())
+        {
+            command.CommandText = sqlPaged;
+            using var reader = await command.ExecuteReaderAsync();
+            while (await reader.ReadAsync())
+            {
+                var morador = new Morador
+                {
+                    Id = reader.GetInt32(reader.GetOrdinal("id")),
+                    Nome = reader.GetString(reader.GetOrdinal("nome")),
+                    Celular = reader.GetString(reader.GetOrdinal("celular")),
+                    Email = reader.GetString(reader.GetOrdinal("email")),
+                    IsProprietario = reader.GetBoolean(reader.GetOrdinal("is_proprietario")),
+                    DataEntrada = reader.GetDateTime(reader.GetOrdinal("data_entrada")),
+                    DataSaida = reader.IsDBNull(reader.GetOrdinal("data_saida")) ? null : reader.GetDateTime(reader.GetOrdinal("data_saida")),
+                    DataInclusao = reader.GetDateTime(reader.GetOrdinal("data_inclusao")),
+                    DataAlteracao = reader.IsDBNull(reader.GetOrdinal("data_alteracao")) ? null : reader.GetDateTime(reader.GetOrdinal("data_alteracao")),
+                    ImovelId = reader.GetInt32(reader.GetOrdinal("imovel_id")),
+                    Imovel = new Imovel
+                    {
+                        Id = reader.GetInt32(reader.GetOrdinal("Imovel_Id")),
+                        Bloco = reader.GetString(reader.GetOrdinal("bloco")),
+                        Apartamento = reader.GetString(reader.GetOrdinal("apartamento")),
+                        BoxGaragem = reader.GetString(reader.GetOrdinal("box_garagem"))
+                    }
+                };
+                items.Add(morador);
+            }
+        }
+
+        int totalCount;
+        using (var commandCount = connection.CreateCommand())
+        {
+            commandCount.CommandText = sqlCount;
+            totalCount = Convert.ToInt32(await commandCount.ExecuteScalarAsync());
+        }
 
         return (items, totalCount);
     }
-
     public async Task<Morador?> GetByIdAsync(int id)
     {
-        string sql = @"
-            SELECT m.id, m.nome, m.celular, m.email, m.is_proprietario,
+        string sql = @"SELECT m.id, m.nome, m.celular, m.email, m.is_proprietario,
                    m.data_entrada, m.data_saida, m.data_inclusao, m.data_alteracao,
-                   m.imovel_id
+                   m.imovel_id,
+                   i.id AS Imovel_Id, i.bloco, i.apartamento, i.box_garagem
             FROM public.morador m
             INNER JOIN public.imovel i ON i.id = m.imovel_id
-            WHERE m.id = @p0;";
+            WHERE m.id = @id";
 
-        return await _context.Moradors
-            .FromSqlRaw(sql, id)
-            .FirstOrDefaultAsync();
+        using var connection = _context.Database.GetDbConnection();
+        await connection.OpenAsync();
+
+        using var command = connection.CreateCommand();
+        command.CommandText = sql;
+
+        var parameter = command.CreateParameter();
+        parameter.ParameterName = "@id";
+        parameter.Value = id;
+        command.Parameters.Add(parameter);
+
+        using var reader = await command.ExecuteReaderAsync();
+        if (await reader.ReadAsync())
+        {
+            return new Morador
+            {
+                Id = reader.GetInt32(reader.GetOrdinal("id")),
+                Nome = reader.GetString(reader.GetOrdinal("nome")),
+                Celular = reader.GetString(reader.GetOrdinal("celular")),
+                Email = reader.GetString(reader.GetOrdinal("email")),
+                IsProprietario = reader.GetBoolean(reader.GetOrdinal("is_proprietario")),
+                DataEntrada = reader.GetDateTime(reader.GetOrdinal("data_entrada")),
+                DataSaida = reader.IsDBNull(reader.GetOrdinal("data_saida")) ? null : reader.GetDateTime(reader.GetOrdinal("data_saida")),
+                DataInclusao = reader.GetDateTime(reader.GetOrdinal("data_inclusao")),
+                DataAlteracao = reader.IsDBNull(reader.GetOrdinal("data_alteracao")) ? null : reader.GetDateTime(reader.GetOrdinal("data_alteracao")),
+                ImovelId = reader.GetInt32(reader.GetOrdinal("imovel_id")),
+                Imovel = new Imovel
+                {
+                    Id = reader.GetInt32(reader.GetOrdinal("Imovel_Id")),
+                    Bloco = reader.GetString(reader.GetOrdinal("bloco")),
+                    Apartamento = reader.GetString(reader.GetOrdinal("apartamento")),
+                    BoxGaragem = reader.IsDBNull(reader.GetOrdinal("box_garagem")) ? null : reader.GetString(reader.GetOrdinal("box_garagem"))
+                }
+            };
+        }
+
+        return null;
     }
 
     public async Task AddAsync(Morador morador)
     {
-        string sql = @"
-            INSERT INTO public.morador
-                (nome, celular, email, is_proprietario, data_entrada, data_saida, data_inclusao, data_alteracao, imovel_id)
-            VALUES
-                (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8)
-            RETURNING id;";
+        morador.DataEntrada = DateTime.SpecifyKind(morador.DataEntrada, DateTimeKind.Local).ToUniversalTime();
+        morador.DataInclusao = DateTime.SpecifyKind(morador.DataInclusao, DateTimeKind.Local).ToUniversalTime();
+        if (morador.DataSaida.HasValue)
+            morador.DataSaida = DateTime.SpecifyKind(morador.DataSaida.Value, DateTimeKind.Local).ToUniversalTime();
+        if (morador.DataAlteracao.HasValue)
+            morador.DataAlteracao = DateTime.SpecifyKind(morador.DataAlteracao.Value, DateTimeKind.Local).ToUniversalTime();
 
-        var newId = await _context.Database
-            .SqlQueryRaw<int>(sql,
-                morador.Nome,
-                morador.Celular,
-                morador.Email,
-                morador.IsProprietario,
-                morador.DataEntrada,
-                morador.DataSaida,
-                morador.DataInclusao,
-                morador.DataAlteracao,
-                morador.ImovelId)
-            .SingleAsync();
+        string sql = @"INSERT INTO public.morador(nome, celular, email, is_proprietario, data_entrada, data_saida, data_inclusao, data_alteracao, imovel_id)
+            VALUES ({0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8})";
+
+        int newId = await _context.Database.ExecuteSqlRawAsync(sql, morador.Nome, morador.Celular, morador.Email, morador.IsProprietario, morador.DataEntrada,
+                morador.DataSaida, morador.DataInclusao, morador.DataAlteracao, morador.ImovelId);
 
         morador.Id = newId;
     }
 
     public async Task UpdateAsync(Morador morador)
     {
-        string sql = @"
-            UPDATE public.morador
-            SET nome = @p0,
-                celular = @p1,
-                email = @p2,
-                is_proprietario = @p3,
-                data_entrada = @p4,
-                data_saida = @p5,
-                data_inclusao = @p6,
-                data_alteracao = @p7,
-                imovel_id = @p8
-            WHERE id = @p9;";
+        morador.DataEntrada = DateTime.SpecifyKind(morador.DataEntrada, DateTimeKind.Local).ToUniversalTime();
+        morador.DataInclusao = DateTime.SpecifyKind(morador.DataInclusao, DateTimeKind.Local).ToUniversalTime();
+        if (morador.DataSaida.HasValue)
+            morador.DataSaida = DateTime.SpecifyKind(morador.DataSaida.Value, DateTimeKind.Local).ToUniversalTime();
+        if (morador.DataAlteracao.HasValue)
+            morador.DataAlteracao = DateTime.SpecifyKind(morador.DataAlteracao.Value, DateTimeKind.Local).ToUniversalTime();
 
-        await _context.Database.ExecuteSqlRawAsync(sql,
-            morador.Nome,
-            morador.Celular,
-            morador.Email,
-            morador.IsProprietario,
-            morador.DataEntrada,
-            morador.DataSaida,
-            morador.DataInclusao,
-            morador.DataAlteracao,
-            morador.ImovelId,
-            morador.Id);
+        string sql = @"UPDATE public.morador 
+                SET nome = @nome,
+                    celular = @celular,
+                    email = @email,
+                    is_proprietario = @is_proprietario,
+                    data_entrada = @data_entrada,
+                    data_saida = @data_saida,
+                    data_inclusao = @data_inclusao,
+                    data_alteracao = @data_alteracao,
+                    imovel_id = @imovel_id
+                WHERE id = @id";
+
+        var parameters = new[]
+        {
+            new NpgsqlParameter("nome", morador.Nome),
+            new NpgsqlParameter("celular", morador.Celular),
+            new NpgsqlParameter("email", morador.Email),
+            new NpgsqlParameter("is_proprietario", morador.IsProprietario),
+            new NpgsqlParameter("data_entrada", morador.DataEntrada),
+            new NpgsqlParameter("data_saida", morador.DataSaida),
+            new NpgsqlParameter("data_inclusao", morador.DataInclusao),
+            new NpgsqlParameter("data_alteracao", morador.DataAlteracao),
+            new NpgsqlParameter("imovel_id", morador.ImovelId),
+            new NpgsqlParameter("id", morador.Id)
+        };
+
+        await _context.Database.ExecuteSqlRawAsync(sql, parameters);
     }
 
     public async Task DeleteAsync(int id)

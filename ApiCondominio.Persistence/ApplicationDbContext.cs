@@ -3,11 +3,8 @@ using ApiCondominio.Domain.Entities;
 
 namespace ApiCondominio.Persistence;
 
-public class ApplicationDbContext : DbContext
+public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options)
 {
-    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
-        : base(options) { }
-
     public DbSet<Imovel> Imovels => Set<Imovel>();
     public DbSet<Morador> Moradors => Set<Morador>();
 

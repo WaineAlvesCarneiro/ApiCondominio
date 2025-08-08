@@ -30,7 +30,7 @@ public class ImovelRepository(ApplicationDbContext context) : IImovelRepository
 
         string sqlPaged = $@"SELECT id, apartamento, bloco, box_garagem FROM public.imovel ORDER BY {order} {dir} LIMIT {{0}} OFFSET {{1}}";
 
-        string sqlCount = "SELECT COUNT(*) FROM public.imovel;";
+        string sqlCount = "SELECT COUNT(*) FROM public.imovel";
 
         List<Imovel> items = await _context.Imovels.FromSqlRaw(sqlPaged, linesPerPage, offset).ToListAsync();
 

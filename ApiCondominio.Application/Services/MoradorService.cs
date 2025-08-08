@@ -119,7 +119,7 @@ public class MoradorService(IMoradorRepository repository, IImovelRepository imo
             IsProprietario = dto.IsProprietario,
             DataEntrada = dto.DataEntrada,
             DataSaida = null,
-            DataInclusao = dto.DataInclusao,//DateTime.UtcNow,
+            DataInclusao = dto.DataInclusao,
             DataAlteracao = null,
             ImovelId = dto.ImovelId
         };
@@ -141,32 +141,23 @@ public class MoradorService(IMoradorRepository repository, IImovelRepository imo
 
     public async Task<Result> UpdateAsync(int id, MoradorDto dto)
     {
+        Imovel? imovel = await _imovelRepository.GetByIdAsync(dto.ImovelId);
+        if (imovel is null)
+            return Result<MoradorDto>.Failure("Imóvel informado não existe.");
+
         Morador? morador = await _repository.GetByIdAsync(id);
         if (morador is null)
             return Result.Failure("Morador não encontrado");
-
-        Imovel? imovel = await _imovelRepository.GetByIdAsync(dto.ImovelId);
-        if (imovel is null)
-            return Result.Failure("Imóvel não encontrado");
 
         morador.Nome = dto.Nome;
         morador.Celular = dto.Celular;
         morador.Email = dto.Email;
         morador.IsProprietario = dto.IsProprietario;
-        morador.DataEntrada = DateTime.SpecifyKind(dto.DataEntrada, DateTimeKind.Utc);
-
-        morador.DataInclusao = dto.DataInclusao != default
-            ? DateTime.SpecifyKind(dto.DataInclusao, DateTimeKind.Utc)
-            : morador.DataInclusao;
-
-        morador.DataSaida = dto.DataSaida.HasValue
-            ? DateTime.SpecifyKind(dto.DataSaida.Value, DateTimeKind.Utc)
-            : null;
-
-        morador.DataAlteracao = dto.DataAlteracao;//DateTime.UtcNow;
-
+        morador.DataEntrada = dto.DataEntrada;
+        morador.DataInclusao = dto.DataInclusao;
+        morador.DataSaida = dto.DataSaida;
+        morador.DataAlteracao = dto.DataAlteracao;
         morador.ImovelId = dto.ImovelId;
-
 
         await _repository.UpdateAsync(morador);
         return Result.Success("Morador atualizado com sucesso.");
