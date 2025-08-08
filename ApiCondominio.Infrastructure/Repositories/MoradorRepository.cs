@@ -170,7 +170,7 @@ public class MoradorRepository(ApplicationDbContext context) : IMoradorRepositor
                     Id = reader.GetInt32(reader.GetOrdinal("Imovel_Id")),
                     Bloco = reader.GetString(reader.GetOrdinal("bloco")),
                     Apartamento = reader.GetString(reader.GetOrdinal("apartamento")),
-                    BoxGaragem = reader.IsDBNull(reader.GetOrdinal("box_garagem")) ? null : reader.GetString(reader.GetOrdinal("box_garagem"))
+                    BoxGaragem = reader.GetString(reader.GetOrdinal("box_garagem"))
                 }
             };
         }
